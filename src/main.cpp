@@ -1,3 +1,11 @@
+//
+// Dump Info from a Credit Card over RFID
+//
+// Copyright (c) 2025 James Wanderer
+//
+// Uses a PN352 to read tap-to-pay apps and credit cards
+//
+
 #include <SPI.h>
 #include <PN532_SPI.h>
 #include <PN532_SPI.cpp>
