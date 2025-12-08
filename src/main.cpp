@@ -6,6 +6,7 @@
 // Uses a PN352 to read tap-to-pay apps and credit cards
 //
 
+#define NFC_INTERFACE_SPI
 #include <SPI.h>
 #include <PN532_SPI.h>
 #include <PN532_SPI.cpp>
@@ -391,7 +392,8 @@ uint8_t dolValMNL[] = {
 
 
 // Elements of the data table
-struct DataOption {
+class DataOption {
+public:
   DataOption(uint8_t tag[2], uint8_t* val, uint8_t val_length);
   uint8_t tag[2];
   uint8_t* value;
