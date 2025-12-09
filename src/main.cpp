@@ -6,9 +6,11 @@
 // Uses a PN352 to read tap-to-pay apps and credit cards
 //
 
-#define NFC_INTERFACE_SPI
+#include <Arduino.h>
 #include <SPI.h>
+#define NFC_INTERFACE_SPI
 #include <PN532_SPI.h>
+// Include a CPP - seems like that is how this lib works.
 #include <PN532_SPI.cpp>
 #include "PN532.h"
 #include "tlv.h"
@@ -32,13 +34,28 @@ bool selectApplicationID(TLVNode* aid_node, TLVNode*& pdol_node);
 TLVNode* getProcessingOptions(TLVNode* pdol_node);
 void readAppRecords(uint8_t sfi, uint8_t start, uint8_t end);
 
+// Elements of the data table for PDO default values
+struct DataOption {
+  DataOption(uint16_t tag, uint8_t* val, uint8_t val_length);
+  uint16_t tag;
+  uint8_t* value;
+  uint8_t value_length;
+};
+
+DataOption::DataOption(uint16_t tag, uint8_t* val, uint8_t val_length) {
+  this->tag = tag;
+  this->value = val;
+  this->value_length = val_length;
+  
+}
 //
 // Setup function
 // Mostly borrowed from PN352 example code.
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial) delay(10);
+  while (!Serial) {}
+  delay(2000);
   Serial.println("-------Read EMV via PN53x--------");
 
   // Setup Tag value to Name lookup table.
@@ -356,57 +373,42 @@ bool selectApplicationID(TLVNode* aid_node, TLVNode*& pdol_node)
 // The choice of data here is mostly arbitrary
 
 // Terminal transaction qualifiers
-uint8_t dolTagTTQ[] = { 0x9f, 0x66  };
+uint16_t dolTagTTQ = 0x9f66;
 uint8_t dolValTTQ[] = { 0x36, 0x80, 0x40, 0x00 };
 
 // Transaction currency code
-uint8_t dolTagTCC[] = { 0x5f, 0x2a  };
+uint16_t dolTagTCC = 0x5f2a;
 uint8_t dolValTCC[] = { 0x08, 0x40 };  // USD numeric code
 
 // Terminal Risk Management Data
-uint8_t dolTagTRMD[] = { 0x9f, 0x1d  };
+uint16_t dolTagTRMD = 0x9f1d;
 uint8_t dolValTRMD[] = { 0x40, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 // Terminal Country Code
-uint8_t dolTagTCnC[] = { 0x9f, 0x1a  };
+uint16_t dolTagTCnC = 0x9f1a;
 uint8_t dolValTCnC[] = { 0x08, 0x40 }; // US
 
 // Terminal Type
-uint8_t dolTagTT[] = { 0x9f, 0x35  };
+uint16_t dolTagTT = 0x9f35;
 uint8_t dolValTT[] = { 0x14 };
 
 // Acquirer Identifier
-uint8_t dolTagAI[] = { 0x9f, 0x01  };
+uint16_t dolTagAI = 0x9f01;
 uint8_t dolValAI[] = { 0x01 };
 
 // Application lifecycle data
-uint8_t dolTagALCD[] = { 0x9f, 0x7e  };
+uint16_t dolTagALCD = 0x9f7e;
 uint8_t dolValALCD[] = { 0x01 };
 
 // Merchant name and location
-uint8_t dolTagMNL[] = { 0x9f, 0x4e };
+uint16_t dolTagMNL = 0x9f4e;
 uint8_t dolValMNL[] = { 
     0x41, 0x42, 0x43, 0x32, 0x30, 0x32, 0x34, 0x30, 0x38, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 
-// Elements of the data table
-class DataOption {
-public:
-  DataOption(uint8_t tag[2], uint8_t* val, uint8_t val_length);
-  uint8_t tag[2];
-  uint8_t* value;
-  uint8_t value_length;
-};
 
-DataOption::DataOption(uint8_t tag[2], uint8_t* val, uint8_t val_length) {
-  this->tag[0]= tag[0];
-  this->tag[1]= tag[1];
-  this->value = val;
-  this->value_length = val_length;
-  
-}
   
 // Data Option Lookup Table
 // Use these values to fill out a PDOL list for the Get Processing Options request
@@ -423,11 +425,10 @@ DataOption data_options_list[] = {
 
 // Seach the table for a matching tag
 // Return NULL if not found
-DataOption* getDataOption(uint8_t tag[2]) 
+DataOption* getDataOption(uint16_t tag) 
 {
   for (int i = 0; i < sizeof(data_options_list); i++) {
-    if (data_options_list[i].tag[0] == tag[0] &&
-        data_options_list[i].tag[1] == tag[1]) {
+    if (data_options_list[i].tag == tag) {
       return &data_options_list[i];
     }
   }
@@ -448,12 +449,12 @@ bool buildDataOptionsList(TLVNode* pdol_node, WriteBuffer& data_options)
   }
 
   while (!dol_list.atEnd()) {
-    uint8_t tag[2];
+    uint16_t tag;
     uint8_t len;
+    int error_flag;
 
-    // TODO: is the tag always 2 bytes in the PDOL?
-    if (!dol_list.getByte(tag[0]) || 
-        !dol_list.getByte(tag[1]) || 
+    tag = TLVNode::parseTag(dol_list, &error_flag);
+    if (error_flag ||
         !dol_list.getByte(len)) {
           Serial.println("Failed reading dol_list");
           return false;
@@ -462,8 +463,7 @@ bool buildDataOptionsList(TLVNode* pdol_node, WriteBuffer& data_options)
     DataOption* option = getDataOption(tag);
     if (option == NULL) {
       Serial.print("Don't have a requested option tag: ");
-      Serial.print(tag[0], HEX);
-      Serial.println(tag[1], HEX);
+      Serial.print(tag, HEX);
       // Add with 0 values
       while (len-- > 0) data_options.putByte(0);
       continue;
@@ -477,8 +477,7 @@ bool buildDataOptionsList(TLVNode* pdol_node, WriteBuffer& data_options)
     // Report any mismatch length, handle need to pad value.
     if (option->value_length != len) {
       Serial.println("mismatched expectation on value length");
-      Serial.print(tag[0], HEX);
-      Serial.print(tag[1], HEX);
+      Serial.print(tag, HEX);
       Serial.print(" requested len: ");
       Serial.print(len);
       Serial.print(" actual len: ");
