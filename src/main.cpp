@@ -427,7 +427,7 @@ DataOption data_options_list[] = {
 // Return NULL if not found
 DataOption* getDataOption(uint16_t tag) 
 {
-  for (int i = 0; i < sizeof(data_options_list); i++) {
+  for (int i = 0; i < sizeof(data_options_list)/sizeof(DataOption); i++) {
     if (data_options_list[i].tag == tag) {
       return &data_options_list[i];
     }
