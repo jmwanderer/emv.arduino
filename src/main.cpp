@@ -408,6 +408,31 @@ uint8_t dolValMNL[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 
+// Transaction amount
+uint16_t dolTagTA = 0x9f02;
+uint8_t dolValTA[] = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x00 };
+
+// Amount other
+uint16_t dolTagAO = 0x9f03;
+uint8_t dolValAO[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+// Terminal verification results
+uint16_t dolTagTVR = 0x95;
+uint8_t dolValTVR[] = { 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+// Transaction date
+uint16_t dolTagTD = 0x9a;
+uint8_t dolValTD[] = { 0x23, 0x03, 0x01 };
+
+// Transaction type
+uint16_t dolTagTrT = 0x9c;
+uint8_t dolValTrT[] = { 0x00 };
+
+// Unpredictable number
+uint16_t dolTagUN = 0x9f37;
+uint8_t dolValUN[] = { 0x38, 0x39, 0x30, 0x31 };
+
+
 
   
 // Data Option Lookup Table
@@ -420,7 +445,13 @@ DataOption data_options_list[] = {
   DataOption(dolTagTT, &dolValTT[0], (uint8_t) sizeof(dolValTT)),
   DataOption(dolTagAI, &dolValAI[0], (uint8_t) sizeof(dolValAI)),
   DataOption(dolTagALCD, &dolValALCD[0], (uint8_t) sizeof(dolValALCD)),
-  DataOption(dolTagMNL, &dolValMNL[0], (uint8_t) sizeof(dolValMNL))
+  DataOption(dolTagMNL, &dolValMNL[0], (uint8_t) sizeof(dolValMNL)),
+  DataOption(dolTagTA, &dolValTA[0], (uint8_t) sizeof(dolValTA)),
+  DataOption(dolTagAO, &dolValAO[0], (uint8_t) sizeof(dolValAO)),
+  DataOption(dolTagTVR, &dolValTVR[0], (uint8_t) sizeof(dolValTVR)),
+  DataOption(dolTagTD, &dolValTD[0], (uint8_t) sizeof(dolValTD)),
+  DataOption(dolTagTrT, &dolValTrT[0], (uint8_t) sizeof(dolValTrT)),
+  DataOption(dolTagUN, &dolValUN[0], (uint8_t) sizeof(dolValUN))
 };
 
 // Seach the table for a matching tag
