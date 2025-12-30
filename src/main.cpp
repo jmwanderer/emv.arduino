@@ -8,17 +8,18 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#define NFC_INTERFACE_SPI
-#include <PN532_SPI.h>
-// Include a CPP - seems like that is how this lib works.
-#include <PN532_SPI.cpp>
-#include "PN532.h"
+#include <Adafruit_PN532.h>
+
 #include "tlv.h"
 #include "emv_tag_names.h"
 
+#define PN532_SCK  (36)
+#define PN532_MOSI (35)
+#define PN532_SS   (3)
+#define PN532_MISO (37)
+
 // Drivers for the PN532
-PN532_SPI pn532_spi(SPI, 3);
-PN532 nfc(pn532_spi);
+Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 
 // Global buffers for sending and recieving
 uint8_t rx_buffer[255];     // Buffer for received messages
@@ -61,7 +62,6 @@ void setup()
   // Setup Tag value to Name lookup table.
   init_tag_names();
 
-  SPI.begin(SCK, MISO, MOSI, 3);
   nfc.begin();
 
   uint32_t versiondata = nfc.getFirmwareVersion();
