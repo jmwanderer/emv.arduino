@@ -13,10 +13,10 @@
 #include "tlv.h"
 #include "emv_tag_names.h"
 
-#define PN532_SCK  (36)
-#define PN532_MOSI (35)
+#define PN532_SCK  (7)
+#define PN532_MOSI (11)
 #define PN532_SS   (3)
-#define PN532_MISO (37)
+#define PN532_MISO (9)
 
 // Drivers for the PN532
 Adafruit_PN532 nfc(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
