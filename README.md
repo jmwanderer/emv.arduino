@@ -36,4 +36,27 @@ working under the Arduino IDE:
 - Rename main.cpp to emv.ino
 - Install the two libraries listed above. (The library manager should work)
 
+
+## Limitations
+
+Large records are unable to be read from credit cards. he PN532 driver
+library doesn't appear to support any data payloads larger than 246 
+bytes (and I have not verified that size works). 
+
+The failure is caught as a length check error in the inDataExchange 
+function.
+
+## The Adafruit Library
+
+Adafruit has a [PN532 library](https://github.com/adafruit/Adafruit-PN532)
+that has more degbug information and may have more fixes that the 
+Seed Studio library. The adafruit branch of this repository uses the
+adafruit library.
+
+One caveat, the default buffer size in Adafruit is only 64. This needs to be
+increased to 255 in the following line found in Adafruit_PN532.cpp
+
+#define PN532_PACKBUFFSIZ 64                ///< Packet buffer size in bytes
+
+
 ## Notes
