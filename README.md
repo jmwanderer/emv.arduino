@@ -5,6 +5,8 @@ C++ code to drive a PN532 RFID reader connected
 on the SPI bus to dump information from
 tap to pay credit cards and payment apps.
 
+Adafruit Driover Branch
+
 ## Caveats
 
 Be aware that some of the information read from credit cards is
@@ -19,7 +21,7 @@ card in a bad state without possible recovery.
 ## Required Libraries
 
 This app needs two libraries:
-- https://github.com/Seeed-Studio/PN532  - driver for the PN532
+- https://github.com/adafruit/Adafruit-PN532 - driver for the PN532
 - https://github.com/jmwanderer/tlv.arduino - decode response messages 
 
 ## Platform IO
